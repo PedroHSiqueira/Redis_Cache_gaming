@@ -26,9 +26,13 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> findById(@PathVariable Long id){
-        return userService.findById(id)
-                .map(user -> ResponseEntity.status(HttpStatus.OK).body(UserMapper.toUserResponseDto(user)))
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        User userDB = userService.findById(id);
+
+        if(userDB == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(UserMapper.toUserResponseDto(userDB));
     }
 
     @PostMapping

@@ -3,9 +3,9 @@ package dev.siqueira.redis_cache_gaming.service;
 import dev.siqueira.redis_cache_gaming.dtos.UserRequestDto;
 import dev.siqueira.redis_cache_gaming.entity.User;
 import dev.siqueira.redis_cache_gaming.repository.UserRepository;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 
 @Service
 public class UserService {
@@ -20,8 +20,9 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public Optional<User> findById(Long id){
-        return userRepository.findById(id);
+    @Cacheable(value = "users", key = "#id", unless = "#result == null")
+    public User findById(Long id){
+        return userRepository.findById(id).orElse(null);
     }
 
     public User update(Long id, UserRequestDto dto){
@@ -40,6 +41,6 @@ public class UserService {
     }
 
     public void delete(Long id){
-        this.findById(id).ifPresent(user -> {userRepository.delete(user);});
+        userRepository.findById(id).ifPresent(user -> {userRepository.delete(user);});
     }
 }
