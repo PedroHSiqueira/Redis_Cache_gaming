@@ -84,6 +84,6 @@ public class UserService {
     }
 
     public void delete(Long id){
-        userRepository.findById(id).ifPresent(user -> {userRepository.delete(user);});
+        userRepository.findById(id).ifPresent(userRepository::delete);
     }
 }
