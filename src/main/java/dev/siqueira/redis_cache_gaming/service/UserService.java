@@ -3,6 +3,7 @@ package dev.siqueira.redis_cache_gaming.service;
 import dev.siqueira.redis_cache_gaming.dtos.UserRequestDto;
 import dev.siqueira.redis_cache_gaming.entity.User;
 import dev.siqueira.redis_cache_gaming.repository.UserRepository;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,7 @@ public class UserService {
         return userRepository.findById(id).orElse(null);
     }
 
+    @CachePut(value = "users", key = "#id", unless = "#result == null")
     public User update(Long id, UserRequestDto dto){
         User user = userRepository.findById(id).orElse(null);
 
