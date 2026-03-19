@@ -48,7 +48,6 @@ public class UserService {
             newUser.setPoints(user.getPoints());
             return userRepository.save(newUser);
         }
-
         return null;
     }
 
@@ -72,9 +71,7 @@ public class UserService {
             long points = (score != null) ? score.longValue() : 0;
 
             ranking.add(new RankingResponseDto(username, points, position++));
-
         }
-
         return ranking;
     }
 
