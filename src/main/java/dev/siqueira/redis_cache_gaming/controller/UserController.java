@@ -1,9 +1,6 @@
 package dev.siqueira.redis_cache_gaming.controller;
 
-import dev.siqueira.redis_cache_gaming.dtos.PointsRequestDto;
-import dev.siqueira.redis_cache_gaming.dtos.PointsResponseDto;
-import dev.siqueira.redis_cache_gaming.dtos.UserRequestDto;
-import dev.siqueira.redis_cache_gaming.dtos.UserResponseDto;
+import dev.siqueira.redis_cache_gaming.dtos.*;
 import dev.siqueira.redis_cache_gaming.entity.User;
 import dev.siqueira.redis_cache_gaming.mapper.UserMapper;
 import dev.siqueira.redis_cache_gaming.service.PointsService;
@@ -11,6 +8,8 @@ import dev.siqueira.redis_cache_gaming.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
@@ -33,6 +32,17 @@ public class UserController {
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(UserMapper.toUserResponseDto(userDB));
+    }
+
+    @GetMapping("/ranking/{limit}")
+    public ResponseEntity<List<RankingResponseDto>> getRanking(@PathVariable int limit){
+        List<RankingResponseDto> ranking = userService.getRanking(limit);
+
+        if(ranking == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(ranking);
     }
 
     @PostMapping
