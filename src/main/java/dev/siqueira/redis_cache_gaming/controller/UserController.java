@@ -2,8 +2,10 @@ package dev.siqueira.redis_cache_gaming.controller;
 
 import dev.siqueira.redis_cache_gaming.dtos.*;
 import dev.siqueira.redis_cache_gaming.entity.User;
+import dev.siqueira.redis_cache_gaming.exception.TooManyRequestsException;
 import dev.siqueira.redis_cache_gaming.mapper.UserMapper;
 import dev.siqueira.redis_cache_gaming.service.PointsService;
+import dev.siqueira.redis_cache_gaming.service.RateLimitService;
 import dev.siqueira.redis_cache_gaming.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,23 +17,29 @@ import java.util.List;
 @RequestMapping("/users")
 public class UserController {
 
-    private UserService userService;
-    private PointsService pointsService;
+    private final UserService userService;
+    private final PointsService pointsService;
+    private final RateLimitService rateLimitService;
 
-    public UserController(UserService userService, PointsService pointsService) {
+    public UserController(UserService userService, PointsService pointsService, RateLimitService rateLimitService) {
         this.userService = userService;
         this.pointsService = pointsService;
+        this.rateLimitService = rateLimitService;
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponseDto> findById(@PathVariable Long id){
-        User userDB = userService.findById(id);
+    public ResponseEntity<?> findById(@PathVariable Long id){
+        try {
+            rateLimitService.rateLimit(id);
+            User userDB = userService.findById(id);
 
-        if(userDB == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            if (userDB == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.status(HttpStatus.OK).body(UserMapper.toUserResponseDto(userDB));
+        }catch (TooManyRequestsException e){
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(e.getMessage());
         }
-
-        return ResponseEntity.status(HttpStatus.OK).body(UserMapper.toUserResponseDto(userDB));
     }
 
     @GetMapping("/ranking/{limit}")
