@@ -4,6 +4,7 @@ import dev.siqueira.redis_cache_gaming.dtos.PointsRequestDto;
 import dev.siqueira.redis_cache_gaming.dtos.PointsResponseDto;
 import dev.siqueira.redis_cache_gaming.entity.User;
 import dev.siqueira.redis_cache_gaming.repository.UserRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,6 +26,7 @@ class PointsServiceTest {
     private UserRepository userRepository;
 
     @Test
+    @DisplayName("Should increment points on the user with success")
     void plusPointsSuccessfully() {
         Long userId = 1L;
 
@@ -50,13 +52,16 @@ class PointsServiceTest {
     }
 
     @Test
+    @DisplayName("Should not increment points on the user, because of an fail")
     void plusPointsFailure() {
         Mockito.when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
         Optional<User> userDB = userRepository.findById(1L);
 
-        assertEquals(Optional.empty(), userDB);
+        PointsResponseDto response = pointsService.plusPoints(1L, new PointsRequestDto(1L));
 
-        Mockito.verify(userRepository, Mockito.times(1)).findById(1L);
+        assertNull(response);
+
+        Mockito.verify(userRepository, Mockito.never()).save(Mockito.any());
     }
 }
