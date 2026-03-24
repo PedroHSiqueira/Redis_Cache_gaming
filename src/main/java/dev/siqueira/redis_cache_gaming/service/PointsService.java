@@ -12,7 +12,7 @@ import java.util.Optional;
 @Service
 public class PointsService {
 
-    private UserRepository  userRepository;
+    private final UserRepository userRepository;
 
     public PointsService(UserRepository userRepository) {
         this.userRepository = userRepository;
