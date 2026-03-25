@@ -12,7 +12,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,6 +29,12 @@ class UserServiceTest {
     private UserRepository userRepository;
 
     @Mock
+    private RedisTemplate<String, String> redisTemplate;
+
+    @Mock
+    private ZSetOperations<String, String> zSetOperations;
+
+    @Mock
     User user;
 
     @Mock
@@ -37,6 +46,7 @@ class UserServiceTest {
         user.setId(1L);
         user.setUsername("Pedro");
         user.setEmail("Siqueira@gmail.com");
+        user.setPoints(0L);
 
         userRequestDto = new UserRequestDto("Siqueira", "pedro@gmail.com");
     }
@@ -69,6 +79,22 @@ class UserServiceTest {
 
         Assertions.assertEquals(null, result);
         Mockito.verify(userRepository, Mockito.times(1)).findById(2L);
+    }
+
+    @Test
+    @DisplayName("Populate Redis Ranking with success")
+    void populateRedisSuccessfully() {
+        User user2 = new User();
+        user2.setUsername("Joao");
+        user2.setPoints(200L);
+
+        Mockito.when(userRepository.findAll()).thenReturn(List.of(user, user2));
+        Mockito.when(redisTemplate.opsForZSet()).thenReturn(zSetOperations);
+
+        userService.populateRedis();
+
+        Mockito.verify(zSetOperations).add("ranking", "Pedro", 0L);
+        Mockito.verify(zSetOperations).add("ranking", "Joao", 200L);
     }
 
     @Test
