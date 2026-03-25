@@ -82,6 +82,41 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("Update user info successfully")
+    void updateUserSuccessfully() {
+        User savedUser = new User();
+        savedUser.setId(1L);
+        savedUser.setUsername("Henrique");
+        savedUser.setEmail("amaral@gmail.com");
+        savedUser.setPoints(0L);
+
+        Mockito.when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(savedUser);
+
+        User result = userService.update(1L, userRequestDto);
+
+        assertNotNull(result);
+        assertEquals(user.getId(), result.getId());
+        assertEquals("Henrique", result.getUsername());
+        assertEquals("amaral@gmail.com", result.getEmail());
+        assertEquals(user.getPoints(), result.getPoints());
+
+        Mockito.verify(userRepository, Mockito.times(1)).findById(1L);
+        Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any(User.class));
+    }
+
+    @Test
+    @DisplayName("User not found in update méthod")
+    void updateUserNotFound() {
+        Mockito.when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+        userService.update(1L, userRequestDto);
+
+        Mockito.verify(userRepository, Mockito.times(1)).findById(1L);
+        Mockito.verify(userRepository, Mockito.never()).save(Mockito.any(User.class));
+    }
+
+    @Test
     @DisplayName("Populate Redis Ranking with success")
     void populateRedisSuccessfully() {
         User user2 = new User();
