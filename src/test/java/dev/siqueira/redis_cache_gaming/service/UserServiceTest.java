@@ -1,5 +1,6 @@
 package dev.siqueira.redis_cache_gaming.service;
 
+import dev.siqueira.redis_cache_gaming.dtos.UserRequestDto;
 import dev.siqueira.redis_cache_gaming.entity.User;
 import dev.siqueira.redis_cache_gaming.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
@@ -27,12 +28,17 @@ class UserServiceTest {
     @Mock
     User user;
 
+    @Mock
+    UserRequestDto userRequestDto;
+
     @BeforeEach
     void setUp() {
-        User user = new User();
+        user = new User();
         user.setId(1L);
         user.setUsername("Pedro");
         user.setEmail("Siqueira@gmail.com");
+
+        userRequestDto = new UserRequestDto("Siqueira", "pedro@gmail.com");
     }
 
     @Test
@@ -46,6 +52,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("Find by ID with success")
     void findByIdSuccessfully() {
         Mockito.when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         User result = userService.findById(1L);
@@ -55,11 +62,33 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("User not found in find by ID!")
     void findByIdNotFound() {
         Mockito.when(userRepository.findById(2L)).thenReturn(Optional.empty());
         User result = userService.findById(2L);
 
         Assertions.assertEquals(null, result);
         Mockito.verify(userRepository, Mockito.times(1)).findById(2L);
+    }
+
+    @Test
+    @DisplayName("Delete from database by delete method")
+    void deleteSuccessfully() {
+        Mockito.when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        User user = userService.findById(1L);
+
+        userRepository.delete(user);
+        Mockito.verify(userRepository, Mockito.times(1)).delete(user);
+    }
+
+    @Test
+    @DisplayName("User not found in delete method")
+    void deleteNotFound() {
+        Mockito.when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+        userService.findById(1L);
+        Mockito.verify(userRepository, Mockito.times(1)).findById(1L);
+        Mockito.verify(userRepository, Mockito.never()).delete(Mockito.any());
     }
 }
