@@ -78,7 +78,7 @@ class UserServiceTest {
 
         User user = userService.findById(1L);
 
-        userRepository.delete(user);
+        userService.delete(user.getId());
         Mockito.verify(userRepository, Mockito.times(1)).delete(user);
     }
 
@@ -87,8 +87,10 @@ class UserServiceTest {
     void deleteNotFound() {
         Mockito.when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
-        userService.findById(1L);
+        User result = userService.findById(1L);
+        Assertions.assertEquals(null, result);
+
         Mockito.verify(userRepository, Mockito.times(1)).findById(1L);
-        Mockito.verify(userRepository, Mockito.never()).delete(Mockito.any());
+        Mockito.verify(userRepository, Mockito.never()).delete(user);
     }
 }
