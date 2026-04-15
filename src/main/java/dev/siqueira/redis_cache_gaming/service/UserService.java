@@ -27,8 +27,7 @@ public class UserService {
     }
 
     public User save(User user){
-        User userDB = userRepository.save(user);
-        return userDB;
+        return userRepository.save(user);
     }
 
     @Cacheable(value = "users", key = "#id", unless = "#result == null")
